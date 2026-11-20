@@ -1,6 +1,6 @@
 # GoldenGate ADMIN plusz
 
-[Ugrás a választómenühöz](#hol-kezdjem)
+[Telepítés](#telepítés) · [Hibakezelés](#4-korábban-működött-most-nem) · [Frissítés](#5-kézi-frissítés-kikényszerítése)
 
 **Telepítési és használati útmutató a GoldenGate chat adminjainak és moderátorainak.**
 
@@ -8,10 +8,10 @@ Először a **Tampermonkey bővítményt**, utána az **ADMIN plusz szkriptet** 
 
 **A leírás olvasásához és a szkript telepítéséhez nem kell GitHub-fiók.** A lap tetején látható fájllistával nem kell foglalkoznod; az alábbi lépéseket kövesd. Ez az útmutató számítógépes Chrome-hoz és Firefoxhoz készült.
 
-## Hol kezdjem
+<a name="hol-kezdjem"></a>
 
-- **Korábban működött, de most nem:** [Ellenőrzés lépésről lépésre](#4-korábban-működött-most-nem).
-- **Régi verzió fut, vagy azonnal frissítenél:** [Kézi frissítés kikényszerítése](#5-kézi-frissítés-kikényszerítése).
+## Telepítés
+
 - Chrome esetén: [1. Google Chrome](#1-google-chrome).
 - Firefox esetén: [2. Mozilla Firefox](#2-mozilla-firefox).
 - Ha a Tampermonkey már telepítve van és futtat szkripteket: [3. Az ADMIN plusz telepítése](#3-az-admin-plusz-telepítése).
@@ -97,7 +97,7 @@ A Tampermonkey menüjét a Firefox jobb felső részén lévő **Bővítmények*
 
 Ha a fenti ellenőrzések után sem indul, próbáld ki normál, nem privát böngészőablakban, majd nézd át a [gyakori kérdéseket](#segítség-és-gyakori-kérdések).
 
-[Vissza a választóhoz](#hol-kezdjem)
+[Vissza a tartalomjegyzékhez](#goldengate-admin-plusz)
 
 <a name="6-kézi-frissítés-kikényszerítése"></a>
 
@@ -117,7 +117,7 @@ Ha a fenti ellenőrzések után sem indul, próbáld ki normál, nem privát bö
 - **Csak kód jelenik meg, nem a frissítőablak?** Kövesd az [ehhez tartozó hibaelhárítást](#a-telepítési-linkre-csak-programkód-jelenik-meg-vagy-egy-fájl-töltődik-le).
 - **Már ugyanaz a verzió fut?** Akkor nincs újabb közzétett kiadás, amit frissítéssel le lehetne tölteni. Ha továbbra is gond van, térj vissza az [ellenőrzési listához](#4-korábban-működött-most-nem).
 
-[Vissza a választóhoz](#hol-kezdjem)
+[Vissza a tartalomjegyzékhez](#goldengate-admin-plusz)
 
 ## Segítség és gyakori kérdések
 
