@@ -8,6 +8,8 @@ Először a **Tampermonkey bővítményt**, utána az **ADMIN plusz szkriptet** 
 
 ## Hol kezdjem
 
+- **Korábban működött, de most nem:** [Ellenőrzés lépésről lépésre](#5-korábban-működött-most-nem).
+- **Régi verzió fut, vagy azonnal frissítenél:** [Kézi frissítés kikényszerítése](#6-kézi-frissítés-kikényszerítése).
 - Chrome esetén: [1. Google Chrome](#1-google-chrome).
 - Firefox esetén: [2. Mozilla Firefox](#2-mozilla-firefox).
 - Ha a Tampermonkey már telepítve van és futtat szkripteket: [3. Az ADMIN plusz telepítése](#3-az-admin-plusz-telepítése).
@@ -79,6 +81,45 @@ A Tampermonkey menüjét a Firefox jobb felső részén lévő **Bővítmények*
 - A korábbi külön **GoldenGate – felhasználóablak pozíciójavítás** szkriptet kapcsold ki: a javítás már az ADMIN plusz része.
 - Mentés vagy frissítés után töltsd újra a chatet.
 
+## 5 Korábban működött most nem
+
+**Ha eddig működött, először a kapcsolókat ellenőrizd. Előfordulhat, hogy véletlenül kikapcsoltad a bővítményt vagy magát a szkriptet.**
+
+1. **Ugyanazt a böngészőt és böngészőprofilt használod?** A Tampermonkeynak abban kell telepítve lennie, amelyikben a chatet megnyitod. Egy másik böngészőben vagy profilban külön kell telepíteni.
+2. **Megvan és be van kapcsolva a Tampermonkey bővítmény?**
+   - Chrome: **⋮ → Bővítmények → Bővítmények kezelése**, vagy másold a címsorba: `chrome://extensions`.
+   - Firefox: **☰ → Kiegészítők és témák → Bővítmények**, vagy másold a címsorba: `about:addons`.
+   - Keresd meg a **Tampermonkey** bővítményt, és ellenőrizd, hogy a kapcsolója be van-e kapcsolva. Ha nincs telepítve, térj vissza a [Chrome](#1-google-chrome) vagy a [Firefox](#2-mozilla-firefox) telepítési részéhez.
+3. **A Tampermonkey saját menüjében is engedélyezve van a működés?** Kattints az ikonjára. Ha ott kikapcsolt állapotot jelez, kapcsold vissza. Ha nem látod az ikont, keresd a böngésző jobb felső részén a **Bővítmények** gomb alatt.
+4. **Maga az ADMIN plusz szkript is be van kapcsolva?** A Tampermonkey menüjében nyisd meg a **Vezérlőpult / Dashboard** részt. Keresd meg a **GoldenGate ADMIN plus** sort. A mellette lévő kapcsoló legyen **bekapcsolva**. Ha nem szerepel a listában, kövesd a [telepítési lépéseket](#3-az-admin-plusz-telepítése).
+5. **Chrome-ban a futtatási engedély is megvan?** A bővítmények oldalán a Tampermonkey **Részletek / Details** részében ellenőrizd a **Felhasználói szkriptek engedélyezése / Allow user scripts** kapcsolót, ha szerepel ilyen lehetőség. A régebbi Chrome beállításait az [engedélyezési rész](#a-szkriptek-futtatásának-engedélyezése) ismerteti. Ha a böngésző webhely-hozzáférést kér, a Tampermonkey érhesse el a `chat.goldengate.hu` oldalt.
+6. **Frissítsd a chatet.** Térj vissza a [chathez](https://chat.goldengate.hu/chat.php), és nyomj **F5-öt** vagy **Ctrl+R-t**. A kapcsolók visszakapcsolása a már nyitott oldalon önmagában nem feltétlenül elég.
+7. **Megjelent a zöld ADMIN plus gomb?** Ha igen, a szkript betöltődött. Kattints rá, és nézd meg a futó verziószámot. Ha régi, kövesd a [kézi frissítés lépéseit](#6-kézi-frissítés-kikényszerítése).
+
+**Ha az ADMIN plus gomb megvan, de egy kezelőfunkció hiányzik:** az új változat az aktuális szobában meglévő saját rangodhoz köti a funkciókat. Moderátori vagy adminjog nélkül csak az ADMIN plus gomb és a leírás marad elérhető; a **Clon scan kizárólag adminoknál** jelenik meg. Másik szobában eltérhet a jogosultságod.
+
+Ha a fenti ellenőrzések után sem indul, próbáld ki normál, nem privát böngészőablakban, majd nézd át a [gyakori kérdéseket](#segítség-és-gyakori-kérdések).
+
+[Vissza a választóhoz](#hol-kezdjem)
+
+## 6 Kézi frissítés kikényszerítése
+
+**A chat F5-tel történő újratöltése a már telepített szkriptet indítja újra; önmagában nem tölti le az új kiadást.** Az automatikus ellenőrzés helyett így frissíthetsz azonnal, Chrome-ban és Firefoxban is:
+
+1. Nézd meg a [GitHubon közzétett aktuális verziót](https://raw.githubusercontent.com/msggolden/goldengate-admin-plus/main/version.txt). A chatben az **ADMIN plus** gombra kattintva a nálad futó verzióval tudod összehasonlítani.
+2. **Ugyanabban a böngészőben**, amelyikben a chatet használod, kattints ide: **[ADMIN plusz kézi frissítése](https://raw.githubusercontent.com/msggolden/goldengate-admin-plus/main/goldengate-admin.user.js)**.
+3. A megnyíló Tampermonkey-ablakban ellenőrizd a **GoldenGate ADMIN plus** nevet és a felkínált verziót, majd válaszd a **Frissítés / Update** lehetőséget. Első telepítésnél a gomb neve **Telepítés / Install**.
+4. A Tampermonkey **Vezérlőpult / Dashboard** részében ellenőrizd, hogy a szkript be van kapcsolva, és csak egy ADMIN plusz példány fut. A korábbi külön Clon scan és azonosítókereső teszteket kapcsold ki, mert a Clon scan már a fő szkript része.
+5. Térj vissza a chatre, majd nyomj **F5-öt** vagy **Ctrl+R-t**.
+6. Kattints az **ADMIN plus** gombra. Az itt látható verziószámnak egyeznie kell a GitHubon közzétett verzióval.
+
+**Másik lehetőség:** a Tampermonkey menüjében indítsd el a **Frissítések keresése / Check for updates** műveletet, ha elérhető. Várd meg az ellenőrzést és az esetleges telepítést, majd töltsd újra a chatet. [Hivatalos Tampermonkey-tájékoztató](https://www.tampermonkey.net/index.php?locale=en)
+
+- **Csak kód jelenik meg, nem a frissítőablak?** Kövesd az [ehhez tartozó hibaelhárítást](#a-telepítési-linkre-csak-programkód-jelenik-meg-vagy-egy-fájl-töltődik-le).
+- **Már ugyanaz a verzió fut?** Akkor nincs újabb közzétett kiadás, amit frissítéssel le lehetne tölteni. Ha továbbra is gond van, térj vissza az [ellenőrzési listához](#5-korábban-működött-most-nem).
+
+[Vissza a választóhoz](#hol-kezdjem)
+
 ## Segítség és gyakori kérdések
 
 ### A telepítési linkre csak programkód jelenik meg vagy egy fájl töltődik le
@@ -126,6 +167,7 @@ A szkript a bejelentkezett fiókod meglévő jogosultságaival dolgozik. A telep
 - A chatben az **ADMIN plus** gombra kattintva a nálad futó verziószámot látod.
 - A Tampermonkey a saját beállításai szerinti időközönként ellenőriz, **nem a chat minden megnyitásakor**. Az automatikus frissítés a Tampermonkey beállításaitól függ.
 - Kézi frissítéshez nyisd meg újra a **telepítési linket**, és válaszd a frissítést. Utána töltsd újra a chatet.
+- Részletes útmutató: [Kézi frissítés kikényszerítése](#6-kézi-frissítés-kikényszerítése).
 - A [goldengate-admin.meta.js](goldengate-admin.meta.js) a Tampermonkey kis frissítésellenőrző fájlja. **Ezt és a version.txt fájlt nem kell külön telepíteni.**
 
 ## Mit tud a kiegészítő
@@ -145,6 +187,19 @@ Az **OK / fogadva** sikeres szerverválaszt jelent. A szkript a tiltás tényleg
 ## A 0.9.12 kiadásról
 
 GitHubos terjesztés, külön verzió- és metaadatfájl, beállított telepítési és frissítési címek. Az útmutató bővítése önmagában nem változtatja meg a szkript verzióját vagy működését.
+
+## A 0.10.2 kiadásról
+
+A Clon scan a fő szkript része lett. Telepítés után kapcsold ki a korábbi külön clone scan tesztszkriptet és a sajátazonosító-kereső tesztet.
+
+- Az **ADMIN plus** gomb és a leírás jogosultság nélkül is elérhető.
+- A felhasználókezelő kiegészítései, az egyperces kirúgás, a minden szobás almenü és az ablakigazítás csak az aktuális szobában meglévő saját **`ope` vagy `adm`** jelölésnél működnek.
+- A **Clon scan** gomb kizárólag a saját **`adm`** jelölésnél jelenik meg. Kattintásra az aktuális névsor „Utolsó IP-je” mezőit hasonlítja össze, és csak az egyező csoportokat sorolja fel. Az X vagy az Escape megszakítja a vizsgálatot. Az eredményeket nem menti el; az IP-egyezés önmagában nem bizonyít személyazonosságot.
+- A rangot a már betöltött saját ID és az aktuális szoba névsora alapján ellenőrzi, **külön adatlekérés nélkül**. Szobaváltáskor vagy jogvesztéskor eltávolítja a kiegészítéseket és leállítja a további kéréseket. A már elküldött műveletet nem tudja visszavonni.
+- A moderátori menü alján megjelenő kerethézag javítását is tartalmazza.
+- A Clon scan eredményablakában megszűnt a felesleges vízszintes görgetősáv. A gomb és az ablak címe „Clon scan”; az ablak címében nincs verziószám. A futó verzió továbbra is az ADMIN plus gomb alatt olvasható.
+
+A megjelenítési szabály nem helyettesíti a szerver jogosultságellenőrzését.
 
 ## Hivatalos segítség
 
