@@ -200,6 +200,12 @@ A Clon scan a fő szkript része lett.
 
 A megjelenítési szabály nem helyettesíti a szerver jogosultságellenőrzését.
 
+## A 0.11.0 kiadás újdonsága: ID Ban
+
+Az adminoknak a Clon scan után megjelenő **ID Ban** gomb két mezőt tartalmazó ablakot nyit: **ID** és **Indok**. Az **OK** a megadott azonosítóra azonnal **15 órás** tiltási kérelmet küld az aktuális szobalista minden szobájába, a beírt indokkal. Nem szükséges hozzá a felhasználót a névsorban megkeresni vagy megnyitni az adatlapját.
+
+A **Mégse**, az **X** és az **Escape** bezárja az ablakot, és megállítja a további küldést. A már elküldött kérelmeket nem vonja vissza. Az eredmény szobánként jelzi a fogadott és hibás kéréseket; a szerver ellenőrzi a tényleges jogosultságot. Szobaváltáskor vagy az adminrang elvesztésekor az ablak bezárul, és a további kérések leállnak.
+
 ## Hivatalos segítség
 
 - [Tampermonkey weboldal](https://www.tampermonkey.net/)

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         GoldenGate ADMIN plus
-// @description  Szobánkénti ranghoz kötött moderátori eszközök és admin Clon scan.
+// @description  Szobánkénti ranghoz kötött moderátori eszközök, admin Clon scan és ID Ban.
 // @namespace    local.goldengate.admin
-// @version      0.10.2
+// @version      0.11.0
 // @homepageURL  https://github.com/msggolden/goldengate-admin-plus
 // @updateURL    https://raw.githubusercontent.com/msggolden/goldengate-admin-plus/main/goldengate-admin.meta.js
 // @downloadURL  https://raw.githubusercontent.com/msggolden/goldengate-admin-plus/main/goldengate-admin.user.js
@@ -14,8 +14,9 @@
 
 (function () {
     'use strict';
-    const version = '0.10.2';
+    const version = '0.11.0';
     const cloneScan = createCloneScan();
+    const idBan = createIdBan();
     const warningReason = 'figyelmeztés-1perc mulva jöhetsz vissza';
     const allRoomsReason = 'Ismételt vagy súlyos szabálysértés, illetve korábbi szabályszegések következménye.';
     const pending = new Set();
@@ -48,6 +49,150 @@
     function getModerationKey() {
         const own = getOwnIdentity();
         return own && (own.admin || own.operator) ? own.id + ':' + own.room : null;
+    }
+
+    function getAdminKey() {
+        const own = getOwnIdentity();
+        return own?.admin ? own.id + ':' + own.room : null;
+    }
+
+    function createIdBan() {
+        let state = null;
+
+        function close() {
+            const previous = state;
+            state = null;
+            previous?.controller?.abort();
+            previous?.popup.remove();
+        }
+
+        async function submit(current) {
+            if (state !== current || current.controller) return;
+            if (!current.key || getAdminKey() !== current.key) { close(); return; }
+            const rawId = current.id.value.trim();
+            const reason = current.reason.value.trim();
+            if (!/^\d+$/.test(rawId) || !validId(rawId)) {
+                current.status.textContent = 'Adj meg egy érvényes felhasználóazonosítót pozitív egész számként.';
+                current.id.focus(); return;
+            }
+            if (!reason) { current.status.textContent = 'Az indok megadása kötelező.'; current.reason.focus(); return; }
+            const userId = String(Number(rawId));
+            if (busyUsers.has(userId) || pending.has(userId)) {
+                current.status.textContent = 'Ennél az ID-nál már folyamatban van egy művelet.'; return;
+            }
+            const rooms = getRooms();
+            if (!rooms.length) { current.status.textContent = 'Nem található szoba a szobalistában.'; return; }
+            const controller = new AbortController();
+            current.controller = controller;
+            busyUsers.add(userId);
+            current.id.disabled = current.reason.disabled = current.ok.disabled = true;
+            current.results.replaceChildren();
+            let accepted = 0, failed = 0;
+            try {
+                for (const room of rooms) {
+                    if (state !== current || controller.signal.aborted) return;
+                    if (getAdminKey() !== current.key) { close(); return; }
+                    current.status.textContent = '15 órás tiltási kérelem küldése: ' + room.name;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex;justify-content:space-between;gap:8px;';
+                    const name = document.createElement('span');
+                    name.textContent = room.name;
+                    name.style.cssText = 'min-width:0;overflow-wrap:anywhere;';
+                    const result = document.createElement('strong'); result.textContent = '…';
+                    row.append(name, result); current.results.append(row);
+                    try {
+                        await banRoom(userId, room.id, 900, reason, current.key, controller.signal);
+                        if (state !== current || controller.signal.aborted) return;
+                        accepted++; result.textContent = 'OK';
+                    } catch (error) {
+                        if (state !== current || controller.signal.aborted) return;
+                        failed++; result.textContent = 'Hiba'; result.title = error.message;
+                    }
+                }
+                if (state === current) current.status.textContent = 'Tiltási kérelem elküldve: 15 óra\nID: ' + userId +
+                    '\n' + rooms.length + ' szobából: ' + accepted + ' fogadva, ' + failed + ' hiba';
+            } finally {
+                busyUsers.delete(userId);
+                if (state === current) {
+                    current.controller = null;
+                    current.id.disabled = current.reason.disabled = current.ok.disabled = false;
+                }
+            }
+        }
+
+        function open() {
+            const key = getAdminKey();
+            if (!key) return;
+            if (state?.key === key) { state.id.focus(); return; }
+            close();
+            const popup = document.createElement('div');
+            popup.id = 'gg-idban-window'; popup.setAttribute('role', 'dialog');
+            popup.setAttribute('aria-labelledby', 'gg-idban-title');
+            popup.style.cssText = 'position:fixed;left:12px;top:32px;width:min(390px,calc(100vw - 24px));z-index:10002;';
+            const frame = document.createElement('div');
+            frame.style.cssText = 'position:relative;margin:0 0 6px 19px;font:12px Verdana,Arial,sans-serif;color:#bb4b07;';
+            const content = document.createElement('div');
+            content.style.cssText = 'position:relative;padding:15px 14px 0 0;background:url("https://chat.goldengate.hu/images/dialog_bg.png") no-repeat right top;';
+            const side = document.createElement('div');
+            side.style.cssText = 'position:absolute;top:0;left:-19px;width:19px;height:100%;background:url("https://chat.goldengate.hu/images/dialog_bg.png") no-repeat left top;';
+            const x = document.createElement('a'); x.href = '#'; x.setAttribute('aria-label', 'Bezárás');
+            x.style.cssText = 'position:absolute;right:18px;top:16px;width:13px;height:13px;line-height:13px;z-index:1;';
+            const image = document.createElement('img'); image.src = 'https://www.goldengate.hu/images/close_x.gif'; image.alt = 'Bezárás';
+            x.append(image); x.addEventListener('click', event => { event.preventDefault(); close(); });
+            const title = document.createElement('strong'); title.id = 'gg-idban-title'; title.textContent = 'ID Ban';
+            title.style.cssText = 'display:block;padding-right:24px;';
+            const separator = document.createElement('hr');
+            separator.style.cssText = 'width:100%;max-width:100%;box-sizing:border-box;margin:6px 0;';
+            const form = document.createElement('form');
+            form.style.cssText = 'max-height:calc(100vh - 130px);overflow-x:hidden;overflow-y:auto;overflow-wrap:anywhere;line-height:1.45;';
+            const explanation = document.createElement('p');
+            explanation.textContent = '15 órás tiltás minden aktuális szobára. Az OK azonnal elküldi a kérelmeket.';
+            const idLabel = document.createElement('label'); idLabel.htmlFor = 'gg-idban-id'; idLabel.textContent = 'ID:';
+            const id = document.createElement('input'); id.id = 'gg-idban-id'; id.name = 'userId'; id.type = 'text';
+            id.inputMode = 'numeric'; id.pattern = '[0-9]+'; id.required = true; id.autocomplete = 'off';
+            const reasonLabel = document.createElement('label'); reasonLabel.htmlFor = 'gg-idban-reason'; reasonLabel.textContent = 'Indok:';
+            const reason = document.createElement('textarea'); reason.id = 'gg-idban-reason'; reason.name = 'reason'; reason.rows = 3; reason.required = true;
+            for (const field of [id, reason]) field.style.cssText = 'display:block;width:100%;max-width:100%;box-sizing:border-box;margin:4px 0 10px;padding:5px;font:inherit;color:#222;background:#fff;';
+            const ok = document.createElement('button'); ok.type = 'submit'; ok.textContent = 'OK';
+            const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Mégse'; cancel.style.marginLeft = '8px';
+            cancel.addEventListener('click', close);
+            const status = document.createElement('div'); status.setAttribute('role', 'status'); status.style.cssText = 'white-space:pre-line;margin:8px 0;';
+            const results = document.createElement('div');
+            state = {key, popup, id, reason, ok, status, results, controller:null};
+            const current = state;
+            form.addEventListener('submit', event => { event.preventDefault(); void submit(current); });
+            form.append(explanation, idLabel, id, reasonLabel, reason, ok, cancel, status, results);
+            content.append(side, x, title, separator, form);
+            const bottom = document.createElement('div');
+            bottom.style.cssText = 'position:relative;height:19px;background:url("https://chat.goldengate.hu/images/dialog_bg.png") no-repeat right bottom;';
+            const corner = document.createElement('div');
+            corner.style.cssText = 'position:relative;left:-19px;width:19px;height:19px;background:url("https://chat.goldengate.hu/images/dialog_bg.png") no-repeat left bottom;';
+            bottom.append(corner); frame.append(content, bottom); popup.append(frame); document.body.append(popup); id.focus();
+        }
+
+        function update() {
+            const key = getAdminKey();
+            if (state && state.key !== key) close();
+            const existing = document.getElementById('gg-idban-button');
+            if (!key) { existing?.remove(); return; }
+            const menu = document.getElementById('MainMenu');
+            if (!menu || existing) return;
+            const button = document.createElement('a'); button.id = 'gg-idban-button'; button.href = '#';
+            button.title = 'ID Ban – 15 órás tiltás minden szobára';
+            button.style.cssText = 'position:absolute;top:3px;left:555px;width:106px;height:17px;';
+            const background = document.createElement('img'); background.src = 'https://chat.goldengate.hu/images/chat/gomb_off.gif'; background.alt = '';
+            background.style.cssText = 'position:absolute;top:0;left:0;width:106px;height:17px;border:0;';
+            const label = document.createElement('div'); label.textContent = 'ID Ban'; label.className = 'font_mainmenu';
+            label.style.cssText = 'position:absolute;top:2px;left:0;width:106px;text-align:center;white-space:nowrap;color:#145c14;';
+            button.append(background, label);
+            button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); open(); });
+            menu.append(button);
+        }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && state) { event.preventDefault(); close(); }
+        });
+        return {update, open, close};
     }
 
     function canModerate(room) {
@@ -475,7 +620,8 @@
         return [...rooms.values()];
     }
 
-    async function banRoom(userId, roomId, minutes, reason, expectedKey = getModerationKey()) {
+    async function banRoom(userId, roomId, minutes, reason, expectedKey = getModerationKey(), signal) {
+        if (signal?.aborted) throw new Error('A művelet megszakítva.');
         if (!expectedKey || expectedKey !== getModerationKey()) throw new Error('Az aktuális szobában nincs moderátori jogosultságod.');
         if (!validId(userId) || !validId(roomId) || !validId(minutes)) {
             throw new Error('Érvénytelen azonosító vagy időtartam.');
@@ -486,6 +632,8 @@
             troom: roomId, ttext: btoa(encodeURIComponent(reason))
         }).toString();
         const controller = new AbortController();
+        const abort = () => controller.abort();
+        signal?.addEventListener('abort', abort, {once:true});
         operationControllers.add(controller);
         const timer = setTimeout(() => controller.abort(), 15000);
         try {
@@ -497,6 +645,7 @@
             return response.status;
         } finally {
             clearTimeout(timer);
+            signal?.removeEventListener('abort', abort);
             operationControllers.delete(controller);
         }
     }
@@ -739,6 +888,7 @@
             ['Működésjelző, leírás és verziószám:', 'Az „ADMIN plus” gomb jelzi, hogy a szkript betöltődött. Rákattintva megnyitható a funkciók leírása és az aktuális verziószám.']
         ];
         sections.push(
+            ['ID Ban – csak adminoknak:', 'A Clon scan mögötti ID Ban gomb egy ID és egy indok megadására szolgáló ablakot nyit. Az OK azonnal 15 órás tiltási kérelmet küld a megadott ID-ra az aktuális szobalista minden szobájában. A megadott indokot használja; nem szükséges hozzá megnyitni a felhasználó adatlapját. Szobánként jelzi, hogy a szerver fogadta-e a kérést. A Mégse, az X vagy az Escape megállítja a további küldést; a már elküldött kérelmeket nem vonja vissza.'],
             ['Szobánkénti jogosultság:', 'Az ADMIN plusz gomb és ez a leírás mindig elérhető. A többi kiegészítés csak akkor működik, ha az aktuális szobában admin vagy moderátor/szobatulajdonos rangod van. A névsor frissítésekor újra ellenőrzi a saját rangodat, külön adatlekérés nélkül. Szobaváltáskor vagy a jogosultság megszűnésekor eltünteti a kiegészítéseket és leállítja a folyamatban lévő további kéréseket.'],
             ['Clon scan – csak adminoknak:', 'Kattintásra beolvassa az aktuális szoba névsorát, majd sorban lekéri az „Utolsó IP-je” mezőket. Az egyező IP-k alatt felsorolja a felhasználókat. A gomb megjelenítéséhez nem kér le adatlapot. Az X vagy az Escape leállítja a vizsgálatot és bezárja az ablakot. Az eredményeket nem menti el. Az IP-egyezés önmagában nem bizonyítja, hogy ugyanaz a személy.']
         );
@@ -793,6 +943,7 @@
         }
         const key = syncModeration();
         cloneScan.update();
+        idBan.update();
         if (!key) return;
         const menu = document.querySelector('#user_window .content');
         if (!menu) return;
